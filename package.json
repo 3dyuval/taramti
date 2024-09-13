@@ -10,11 +10,13 @@
     "serve": "node -r dotenv/config dist/server/index.mjs",
     "seed": "node --loader  ts-node/esm --experimental-specifier-resolution=node  ./server/seed.ts",
     "test-db": "node --loader  ts-node/esm --experimental-specifier-resolution=node  ./server/mysql.test.ts",
+    "populate-wp": "node --loader  ts-node/esm --experimental-specifier-resolution=node  ./server/populate-locations.ts",
     "preview": "vite preview",
     "start": "npm run build && npm run serve",
     "visualize": "npx vite-bundle-visualizer -c vite.configvisualize.ts"
   },
   "dependencies": {
+    "axios": "^1.7.7",
     "dotenv": "^16.3.1",
     "lru-cache": "^10.1.0",
     "mysql2": "^3.11.2",

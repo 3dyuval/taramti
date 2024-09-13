@@ -4,7 +4,9 @@ import { MySQL } from './mysql.storage'
 (async () => {
   const db = MySQL.getInstance();
   await db.init(); // Initialize the database connection
-  const locations = await db.getLocations('2024-01-01', '2024-12-31');
+  const locations = await db.getLocations();
+  // const locations = await db.getLocations('2024-01-01', '2024-12-31');
+
   console.log(locations);
 
   try {

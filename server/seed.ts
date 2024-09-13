@@ -1,50 +1,57 @@
 import { DonationLocationDate } from '../src/types'
-import mysql from 'mysql2/promise';
-import { requestMadaData, DonationLocationDate } from './madaRequest';
-import dotenv from 'dotenv';
-dotenv.config();
+import { DonationLocationDate, requestMadaData } from './madaRequest'
+import dotenv from 'dotenv'
+import { MySQL } from './mysql.storage'
 
-async function insertData() {
 
-  const connection = await mysql.createConnection({
-    host: process.env.MYSQL_HOST,
-    user: process.env.MYSQL_USER,
-    database: process.env.MYSQL_DATABASE,
-    // password: process.env.MYSQL_PASSWORD,
-  });
+dotenv.config()
+
+async function populateWpData() {
+
+  const db = await MySQL.getInstance().init()
 
   // Fetch the data
-  const data: DonationLocationDate[] = await requestMadaData();
+  const data: DonationLocationDate[] = await requestMadaData()
 
   // Loop over the data and insert it into the MySQL database
   for (const item of data) {
-    const { dateOpen, dateClose, donationLocation } = item;
-    const { name, schedulingUrl, address } = donationLocation;
-    const { city, street, number } = address;
+    try {
+      const { dateOpen, dateClose, donationLocation } = item
+      const { name, schedulingUrl, address } = donationLocation
+      const { city, street, number } = address
 
-    // Insert into Address table
-    const [addressResult] = await connection.execute(
-      'INSERT INTO Address (city, street, number) VALUES (?, ?, ?)',
-      [city, street, number]
-    );
-    const addressId = addressResult.insertId;
+      // Insert into Address table
+      const [addressResult] = await db.connection.execute(
+        'INSERT INTO Address (city, street, number) VALUES (?, ?, ?)',
+        [city, street, number],
+      )
+      const addressId = addressResult.insertId
 
-    // Insert into DonationLocation table
-    const [donationLocationResult] = await connection.execute(
-      'INSERT INTO DonationLocation (name, schedulingUrl, addressId) VALUES (?, ?, ?)',
-      [name, schedulingUrl, addressId]
-    );
-    const donationLocationId = donationLocationResult.insertId;
+      // Insert into DonationLocation table
+      const [donationLocationResult] = await db.connection.execute(
+        'INSERT INTO DonationLocation (name, schedulingUrl, addressId) VALUES (?, ?, ?)',
+        [name, schedulingUrl, addressId],
+      )
+      const donationLocationId = donationLocationResult.insertId
 
-    // Insert into DonationLocationDate table
-    await connection.execute(
-      'INSERT INTO DonationLocationDate (dateOpen, dateClose, donationLocationId) VALUES (?, ?, ?)',
-      [dateOpen, dateClose, donationLocationId]
-    );
+      // Insert into DonationLocationDate table
+      await connection.execute(
+        'INSERT INTO DonationLocationDate (dateOpen, dateClose, donationLocationId) VALUES (?, ?, ?)',
+        [dateOpen, dateClose, donationLocationId],
+      )
+
+    } catch (error) {
+      if (error.code === 'ER_DUP_ENTRY') {
+        console.warn('Duplicate entry detected:', error.sqlMessage)
+      } else {
+        console.error('Error inserting data:', error)
+      }
+    }
+
   }
 
-  console.log('Data successfully inserted!');
-  await connection.end();
+  console.log('Data successfully inserted!')
+  await connection.end()
 }
 
-insertData().catch(console.error);
+insertData().catch(console.error)
