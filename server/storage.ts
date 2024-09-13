@@ -3,19 +3,11 @@ import { requestMadaData } from './madaRequest.js'
 import { LRUCache } from 'lru-cache'
 import { isAfter, isBefore } from 'date-fns'
 
-
 export class DB implements IStorage {
   private cache
 
   constructor() {
     this.cache = new LRUCache({ max: 10000, ttl: 1000 * 60 * 60 * 24 })
-    return this
-  }
-
-
-  async init() {
-    this.cache = new LRUCache({ max: 10000, ttl: 1000 * 60 * 60 * 24 })
-    console.log('init DB start')
     return this
   }
 
