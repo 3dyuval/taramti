@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import axios, { Axios } from 'axios'
+import axios, { Axios, AxiosRequestConfig } from 'axios'
 
 dotenv.config()
 
@@ -7,7 +7,7 @@ if (!process.env.WP_API_URL || !process.env.WP_USERNAME || !process.env.WP_PASSW
   throw new Error('WP_API_URL, WP_USERNAME, or WP_PASSWORD environment variable is missing.')
 }
 
-const config = {
+const config: AxiosRequestConfig = {
   baseURL: process.env.WP_API_URL,
   auth: {
     username: process.env.WP_USERNAME,
@@ -17,24 +17,25 @@ const config = {
     'Content-Type': 'application/json',
     'Accept': '*/*'
   },
-  timeout: 10_000,
+  timeout: 30_000,
+  family: 4, // Forces Axios to use IPv4
 }
 
 const wp = new Axios(config)
 
 async function populateWpData() {
 
-  await wp.options(`/locations`)
-    .then(res => console.log(res.data))
-    .catch(console.error)
-
-  // await wp.get('/users', {
-  //   params: {
-  //     context: 'edit',
-  //   },
-  // })
+  // await wp.options(`/locations`)
   //   .then(res => console.log(res.data))
   //   .catch(console.error)
+
+  await wp.get('/users', {
+    params: {
+      context: 'edit',
+    },
+  })
+    .then(res => console.log(res.data))
+    .catch(console.error)
 
 
   return process.exit(0)
