@@ -1,8 +1,9 @@
 import type {
   PageContextBuiltInClientWithServerRouting as PageContextBuiltInClient,
-  PageContextBuiltInServer
+  PageContextBuiltInServer,
 } from 'vike/types'
 import type { ComponentPublicInstance } from 'vue'
+
 
 export type Coords = {
   lat: string;
@@ -19,15 +20,11 @@ export interface IStorage {
 export type DonationLocationDate = {
   dateOpen: number
   dateClose: number
-  donationLocation: {
-    name: string;
-    schedulingUrl: string;
-    address: {
-      city: string | null;
-      street: string | null;
-      number: string | null;
-    }
-  }
+  name: string;
+  schedulingUrl: string;
+  city: string | null;
+  street: string | null;
+  number: string | null;
 }
 
 

@@ -45,7 +45,7 @@ const { share } = useShare({
       <v-card elevation='0'>
         <template #title>
           <div class='d-flex flex-row justify-space-between flex-wrap'>
-            <h3 class='mb-4'>{{ location.donationLocation.name }}</h3>
+            <h3 class='mb-4'>{{ location.name }}</h3>
             <opening-hours-chip
               :from-hour='location.dateOpen'
               :to-hour='location.dateClose'

@@ -29,9 +29,9 @@ const settings = reactive<{
 
 const items = computed(() => {
   return locations.map((item) => ({
-    title: item.donationLocation.name,
-    value: item.donationLocation.name,
-    subtitle: item.donationLocation.address.city,
+    title: item.name,
+    value: item.name,
+    subtitle: item.city,
     time: useOpeningTime(item.dateOpen, item.dateClose),
     from: item.dateOpen,
     to: item.dateClose
@@ -128,7 +128,7 @@ const customFilter: any = (_value: any, query: any, any) => {
         variant='tonal'
         class='my-4 flex-1-1'
         :href='`/donation-location/${settings.query}`'
-        :disabled='settings.query === location?.donationLocation.name'
+        :disabled='settings.query === location?.name'
       />
     </v-card-actions>
   </v-card>

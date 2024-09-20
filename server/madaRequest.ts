@@ -1,6 +1,7 @@
 import { getDates } from '../src/helpers/getDates'
 import type { DonationLocationDate } from '../src/types'
 
+
 export type MadaResponse = {
   'ErrorCode': null,
   'ErrorMsg': '',
@@ -45,8 +46,8 @@ export const requestMadaData = async (): Promise<DonationLocationDate[]> => {
         'referer': 'https://www.mdais.org/blood-donation',
         'sec-ch-ua-platform': '"Windows"',
         'sec-gpc': '1',
-        'cookie': 'GCLB=CK2TyZmj2MaW0gE; rbzid=E5HZdntSNcf13hXTIFC4UsLbpwQ5zyq5xLxCRMohzas/+98rp7oaDL6PA5L2OY3ddSSXbvsvuyvw9hfoXLQRfL9Kv9fX30O/ROQABN+q/78iKgx6BE99Gf/r8RcFvNWyMzXPhV7UCUoqiZqZSAAfPwb0nZ3V5e0oAlIfQQV6ki4gdSZHBJwfflSWtj18X3GilYZ7jJXYFs7vkgFrkm8GolLs0vj9grJxq+sf3AS4jrs=; rbzsessionid=4f2dd1b7808cbafab95244794115c547; _ga=GA1.1.778795905.1681542814; _ga_X02F6V2R9K=GS1.1.1681551465.2.0.1681552979.0.0.0'
-      }
+        'cookie': 'GCLB=CK2TyZmj2MaW0gE; rbzid=E5HZdntSNcf13hXTIFC4UsLbpwQ5zyq5xLxCRMohzas/+98rp7oaDL6PA5L2OY3ddSSXbvsvuyvw9hfoXLQRfL9Kv9fX30O/ROQABN+q/78iKgx6BE99Gf/r8RcFvNWyMzXPhV7UCUoqiZqZSAAfPwb0nZ3V5e0oAlIfQQV6ki4gdSZHBJwfflSWtj18X3GilYZ7jJXYFs7vkgFrkm8GolLs0vj9grJxq+sf3AS4jrs=; rbzsessionid=4f2dd1b7808cbafab95244794115c547; _ga=GA1.1.778795905.1681542814; _ga_X02F6V2R9K=GS1.1.1681551465.2.0.1681552979.0.0.0',
+      },
     })
 
   const { Success, Result } = await response.json() as MadaResponse
@@ -66,15 +67,11 @@ export const requestMadaData = async (): Promise<DonationLocationDate[]> => {
       return {
         dateOpen,
         dateClose,
-        donationLocation: {
-          name: safeName(item.Name || item.AccountType),
-          schedulingUrl: item.SchedulingURL,
-          address: {
-            city: item.City,
-            street: item.Street,
-            number: item.NumHouse
-          }
-        }
+        name: safeName(item.Name || item.AccountType),
+        schedulingUrl: item.SchedulingURL,
+        city: item.City,
+        street: item.Street,
+        number: item.NumHouse,
       }
     })
 

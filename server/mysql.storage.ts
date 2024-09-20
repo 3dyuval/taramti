@@ -1,30 +1,33 @@
-import mysql from 'mysql2/promise';
-import { DonationLocationDate } from '../src/types';
-import { IStorage } from './storage';
+import mysql from 'mysql2/promise'
+import { DonationLocationDate } from '../src/types'
+import { IStorage } from './storage'
 import dotenv from 'dotenv'
-dotenv.config();
+
+
+dotenv.config()
 
 
 export class MySQL implements IStorage {
-  private static instance: MySQL;
-  private connection: mysql.Pool | null = null;
+  private static instance: MySQL
+  private connection: mysql.Pool | null = null
 
   // Private constructor to prevent direct instantiation
-  private constructor() {}
+  private constructor() {
+  }
 
   // Static method to get the singleton instance
   public static getInstance(): MySQL {
     if (!MySQL.instance) {
-      MySQL.instance = new MySQL();
+      MySQL.instance = new MySQL()
     }
-    return MySQL.instance;
+    return MySQL.instance
   }
 
   // Async initialization method
   async init(): Promise<this> {
     if (this.connection) {
       // Connection already initialized
-      return this;
+      return this
     }
 
     // Create a connection pool
@@ -35,25 +38,25 @@ export class MySQL implements IStorage {
       // password: process.env.MYSQL_PASSWORD,
       waitForConnections: true,
       connectionLimit: 10,
-      queueLimit: 0
-    });
+      queueLimit: 0,
+    })
 
     // Optionally test the connection
     try {
-      await this.connection.query('SELECT 1');
-      console.log('Database connected successfully');
+      await this.connection.query('SELECT 1')
+      console.log('Database connected successfully')
     } catch (error) {
-      console.error('Error connecting to the database:', error);
-      throw error;
+      console.error('Error connecting to the database:', error)
+      throw error
     }
 
-    return this;
+    return this
   }
 
   // Retrieve locations within a date range
   async getLocations(dateFrom?: string, dateTo?: string): Promise<DonationLocationDate[]> {
     if (!this.connection) {
-      throw new Error('Database not initialized');
+      throw new Error('Database not initialized')
     }
 
     let query = `
@@ -74,36 +77,32 @@ export class MySQL implements IStorage {
         DonationLocation dl ON dld.donationLocationId = dl.id
       JOIN
         Address a ON dl.addressId = a.id
-    `;
+    `
 
-    const params: any[] = [];
+    const params: any[] = []
     if (dateFrom && dateTo) {
-      query += ' WHERE dld.dateOpen >= ? AND dld.dateClose <= ?';
-      params.push(dateFrom, dateTo);
+      query += ' WHERE dld.dateOpen >= ? AND dld.dateClose <= ?'
+      params.push(dateFrom, dateTo)
     }
 
-    const [rows] = await this.connection.query(query, params);
+    const [rows] = await this.connection.query(query, params)
 
     // Convert rows to DonationLocationDate[]
     return rows.map((row: any) => ({
       dateOpen: row.dateOpen,
       dateClose: row.dateClose,
-      donationLocation: {
-        name: row.donationLocationName,
-        schedulingUrl: row.donationLocationSchedulingUrl,
-        address: {
-          city: row.addressCity,
-          street: row.addressStreet,
-          number: row.addressNumber
-        }
-      }
-    }));
+      name: row.donationLocationName,
+      schedulingUrl: row.donationLocationSchedulingUrl,
+      city: row.addressCity,
+      street: row.addressStreet,
+      number: row.addressNumber,
+    }))
   }
 
   // Retrieve a location by name
   async getLocationByName(name: string): Promise<DonationLocationDate> {
     if (!this.connection) {
-      throw new Error('Database not initialized');
+      throw new Error('Database not initialized')
     }
 
     const query = `
@@ -126,29 +125,25 @@ export class MySQL implements IStorage {
         Address a ON dl.addressId = a.id
       WHERE
         dl.name = ?
-    `;
+    `
 
-    const [rows] = await this.connection.query(query, [name]);
+    const [rows] = await this.connection.query(query, [name])
 
     if (rows.length === 0) {
-      throw new Error('Location not found');
+      throw new Error('Location not found')
     }
 
-    const row = rows[0];
+    const row = rows[0]
 
     // Convert row to DonationLocationDate
     return {
       dateOpen: row.dateOpen,
       dateClose: row.dateClose,
-      donationLocation: {
-        name: row.donationLocationName,
-        schedulingUrl: row.donationLocationSchedulingUrl,
-        address: {
-          city: row.addressCity,
-          street: row.addressStreet,
-          number: row.addressNumber
-        }
-      }
-    };
+      name: row.donationLocationName,
+      schedulingUrl: row.donationLocationSchedulingUrl,
+      city: row.addressCity,
+      street: row.addressStreet,
+      number: row.addressNumber,
+    }
   }
 }
