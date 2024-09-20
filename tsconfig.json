@@ -5,7 +5,9 @@
     "compilerOptions": {
       "module": "NodeNext",
       "moduleResolution": "NodeNext",
-      "rootDir": "."
+      "rootDir": ".",
+      "esModuleInterop": true,
+      "allowImportingTsExtensions": true
     },
   },
   "compilerOptions": {
