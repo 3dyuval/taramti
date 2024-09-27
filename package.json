@@ -5,17 +5,22 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev-spa": "vite -c ./vite.config.spa.ts",
     "dev-debug": "vavite-loader vite dev",
     "build": "vavite build",
     "serve": "node -r dotenv/config dist/server/index.mjs",
     "seed": "node --loader  ts-node/esm --experimental-specifier-resolution=node  ./server/seed.ts",
     "test-db": "node --loader  ts-node/esm --experimental-specifier-resolution=node  ./server/mysql.test.ts",
-    "populate-wp": "ts-node  ./server/populate-locations.ts",
+    "populate-wp": "ts-node ./server/populate-locations.ts",
+    "update-wp": "ts-node  ./server/update-location.ts",
     "preview": "vite preview",
     "start": "npm run build && npm run serve",
     "visualize": "npx vite-bundle-visualizer -c vite.configvisualize.ts"
   },
   "dependencies": {
+    "vue": "^3.3.11"
+  },
+  "devDependencies": {
     "axios": "^1.7.7",
     "dotenv": "^16.3.1",
     "lru-cache": "^10.1.0",
@@ -25,9 +30,6 @@
     "vavite": "^3.0.0",
     "vike": "^0.4.150",
     "vite": "^4.0.0",
-    "vue": "^3.3.11"
-  },
-  "devDependencies": {
     "@fawmi/vue-google-maps": "^0.9.79",
     "@intlify/unplugin-vue-i18n": "^1.6.0",
     "@intlify/vue-i18n-extensions": "^5.0.1",

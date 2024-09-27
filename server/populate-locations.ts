@@ -25,6 +25,9 @@ const wp = axios.create({
 })
 
 async function populateWpData() {
+  // function decodeTitle(response: { data: [{ title: { rendered: string } }] }) {
+  //   return response.data.map(item => decodeURIComponent(item.title.rendered))
+  // }
 
 
   await wp.get('/users', {
@@ -37,65 +40,46 @@ async function populateWpData() {
 
 
   const db = await MySQL.getInstance().init()
-
   const data: DonationLocationDate[] = await db.getLocations()
-
+  await db.connection.end()
   console.log(data.length + ' locations found in database')
-
-  function decodeTitle(response: { data: [{ title: { rendered: string } }] }) {
-    return response.data.map(item => decodeURIComponent(item.title.rendered))
-  }
-
-
-  const [wpLocationsTitles, wpSchedulesTitles,] = await Promise.all(
-    [
-      wp.get(`/locations`).then(decodeTitle),
-      wp.get(`/schedule`).then(decodeTitle),
-    ])
-
-  console.log(wpLocationsTitles, wpSchedulesTitles)
+  console.log('Database connection closed')
 
 
   const requests = new Set()
 
-  for (const item of data) {
-    const { dateOpen, dateClose, donationLocation } = item
-    const { name, schedulingUrl, address } = donationLocation
-    const { city, street, number } = address
+  for (const { dateOpen, dateClose, name, schedulingUrl, city, street, number }
+    of data.slice(0)) {
 
-    if (!wpLocationsTitles.includes(name)) {
-      requests.add(wp.post(`/locations`, {
-        title: name,
-        content: `Address: ${street}, ${number}, ${city}`,
-        status: 'publish',
-        acf: {
-          city: city,
-          street: street,
-          number: number,
-        },
-      }).then(res => console.log(`Inserted locations for '${street}, ${number}, ${city}' into WordPress.`)))
-    }
+    requests.add(wp.post(`/locations`, {
+      title: name,
+      content: `Address: ${street}, ${number}, ${city}`,
+      status: 'publish',
+      acf: {
+        city,
+        street,
+        number,
+      },
+    }).then(res => console.log(`Inserted locations for '${street}, ${number}, ${city}' into WordPress.`)))
 
-    if (!wpSchedulesTitles.some(title => title.includes(`Schedule for ${name}`))) {
-      requests.add(wp.post(`/schedule`, {
-        title: `Schedule for ${name}`,
-        content: `Scheduling URL: ${schedulingUrl}`,
-        status: 'publish',
-        acf: {
-          from: dateOpen,
-          to: dateClose,
-        },
-      }).catch(console.error)
-        .then(res => console.log(`Inserted schedule for '${name}' from ${dateOpen} to ${dateClose} into WordPress.`)))
-    }
+    requests.add(wp.post(`/schedule`, {
+      title: `Schedule for ${name}`,
+      content: `Blood donation date for ${name}`,
+      status: 'publish',
+      acf: {
+        schedulingUrl,
+        dateOpen,
+        dateClose,
+      },
+    }).catch(console.error)
+      .then(res => console.log(`Inserted schedule for '${name}' from ${dateOpen} to ${dateClose} into WordPress.`)))
   }
 
 
   await Promise.allSettled(requests)
     .then(() => console.log('All requests finished'))
 
-  await db.connection.end()
-  console.log('Database connection closed')
+
   process.exit(0)
 }
 
